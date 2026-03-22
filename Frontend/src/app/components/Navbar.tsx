@@ -3,6 +3,56 @@ import { motion, AnimatePresence } from "motion/react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
 import { HelpCircle, Search, Info, Menu, X, Home } from "lucide-react";
+import { useBackendStatus } from "../../hooks/useBackendStatus";
+
+function BackendPill({ compact = false }: { compact?: boolean }) {
+    const status = useBackendStatus();
+
+    const cfg = {
+        checking: {
+            dot: "bg-amber-400",
+            glow: "shadow-[0_0_6px_2px_rgba(251,191,36,0.5)]",
+            text: "text-amber-400",
+            label: "Checking…",
+            pulse: true,
+        },
+        online: {
+            dot: "bg-emerald-400",
+            glow: "shadow-[0_0_6px_2px_rgba(52,211,153,0.5)]",
+            text: "text-emerald-400",
+            label: "API Online",
+            pulse: true,
+        },
+        offline: {
+            dot: "bg-red-500",
+            glow: "shadow-[0_0_6px_2px_rgba(239,68,68,0.5)]",
+            text: "text-red-400",
+            label: "API Offline",
+            pulse: false,
+        },
+    }[status];
+
+    return (
+        <div
+            className={`flex items-center gap-1.5 ${
+                compact ? "" : "px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10"
+            }`}
+            title={`Backend status: ${status}`}
+        >
+            <span className="relative flex h-2 w-2">
+                {cfg.pulse && (
+                    <span
+                        className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${cfg.dot}`}
+                    />
+                )}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${cfg.dot} ${cfg.glow}`} />
+            </span>
+            {!compact && (
+                <span className={`text-xs font-medium ${cfg.text} whitespace-nowrap`}>{cfg.label}</span>
+            )}
+        </div>
+    );
+}
 
 export function Navbar() {
     const location = useLocation();
@@ -103,6 +153,14 @@ export function Navbar() {
                         {/* Divider */}
                         <div className="w-px h-4 bg-black/10 dark:bg-white/10 mx-1"></div>
 
+                        {/* Backend Status */}
+                        <div className="px-1">
+                            <BackendPill />
+                        </div>
+
+                        {/* Divider */}
+                        <div className="w-px h-4 bg-black/10 dark:bg-white/10 mx-1"></div>
+
                         {/* Theme Toggle */}
                         <div className="px-1">
                             <ThemeToggle className="border-none shadow-none bg-transparent hover:border-0 hover:glow-0 p-1 rounded-full text-foreground/80 hover:text-purple-500 transition-none" />
@@ -180,6 +238,11 @@ export function Navbar() {
                             <div className="flex items-center justify-between px-4 py-2">
                                 <span className="text-sm font-medium text-foreground/80">Theme</span>
                                 <ThemeToggle className="scale-110" />
+                            </div>
+
+                            <div className="flex items-center justify-between px-4 py-2">
+                                <span className="text-sm font-medium text-foreground/80">Backend</span>
+                                <BackendPill />
                             </div>
                         </motion.div>
                     )}
