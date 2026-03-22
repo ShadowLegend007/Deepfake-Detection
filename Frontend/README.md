@@ -27,7 +27,7 @@ Ensure you are running Node.js 18 or higher.
 ### 2. Environment Setup
 Create a `.env` file in the `Frontend/` directory to point to your FastAPI backend:
 ```env
-VITE_API_URL=http://127.0.0.1:8000
+VITE_API_URL=http://127.0.0.1:8064
 ```
 
 ### 3. Install Dependencies

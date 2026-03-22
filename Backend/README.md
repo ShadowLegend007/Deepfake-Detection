@@ -30,13 +30,13 @@ Backend/
 ```bash
 cd Backend
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 8064 --reload
 ```
 
 Once running:
-- **Interactive API docs** → [http://localhost:8000/docs](http://localhost:8000/docs)
-- **ReDoc** → [http://localhost:8000/redoc](http://localhost:8000/redoc)
-- **Health check** → [http://localhost:8000/](http://localhost:8000/)
+- **Interactive API docs** → [http://localhost:8064/docs](http://localhost:8064/docs)
+- **ReDoc** → [http://localhost:8064/redoc](http://localhost:8064/redoc)
+- **Health check** → [http://localhost:8064/](http://localhost:8064/)
 
 ---
 

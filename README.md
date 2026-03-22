@@ -48,7 +48,7 @@ cd Backend
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
-*The backend will be live at `http://localhost:8000`.*
+*The backend will be live at `http://localhost:8064`.*
 
 ### Step 2: Start the Frontend (Vite/React)
 Open a new terminal window:
