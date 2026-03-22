@@ -9,6 +9,7 @@ import { Analysis } from "./pages/Analysis";
 import { About } from "./pages/About";
 import { Help } from "./pages/Help";
 import LiquidEther from "./components/LiquidEther";
+import SplashCursor from "./components/SplashCursor";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -152,11 +153,19 @@ function App() {
                   />
                 </div>
               ) : (
-                <>
-                  <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
-                  <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay pointer-events-none"></div>
-                </>
+                <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+                  <SplashCursor
+                    SIM_RESOLUTION={128}
+                    DYE_RESOLUTION={1440}
+                    DENSITY_DISSIPATION={3.5}
+                    VELOCITY_DISSIPATION={2}
+                    PRESSURE={0.1}
+                    CURL={3}
+                    SPLAT_RADIUS={0.2}
+                    SPLAT_FORCE={6000}
+                    COLOR_UPDATE_SPEED={10}
+                  />
+                </div>
               )}
             </div>
 

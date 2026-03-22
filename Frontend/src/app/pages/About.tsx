@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import PixelTransition from '../components/PixelTransition';
 import { motion } from 'motion/react';
 import { Github, Linkedin, Globe, Instagram } from 'lucide-react';
+import ritabhasImg from '../assets/ritabhas.jpg';
 
 const TeamMemberCard = ({
     name,
@@ -110,14 +111,13 @@ export const About = () => {
             }
         },
         {
-            name: "Akash Saha",
+            name: "Ritabhas Barick",
             role: "ML Expert",
-            image: "https://i.ibb.co/Xrw1vLm6/Akash.jpg",
+            image: ritabhasImg,
             socials: {
-                github: "https://github.com/akashsaha477",
-                linkedin: "https://www.linkedin.com/in/akash-saha-16a734b8/",
-                instagram: "https://www.instagram.com/a_visionary_shutterbug/",
-
+                github: "https://github.com/ritabhasbarick-sketch",
+                linkedin: "https://www.linkedin.com/in/ritabhas-barick-78a8983b4",
+                instagram: "https://www.instagram.com/ritabhas_barick",
             }
         },
         {

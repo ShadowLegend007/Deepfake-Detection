@@ -1,7 +1,7 @@
 import { ArrowRight, Shield, Zap, Eye } from "lucide-react";
 import { motion } from "motion/react";
 import { AnimatedButton } from "../components/AnimatedButton";
-import SplitText from "../components/SplitText";
+import GradientText from "../components/GradientText";
 import { ScrollReveal } from "../components/ScrollReveal";
 import { useNavigate } from "react-router-dom";
 
@@ -62,20 +62,14 @@ export function Home() {
 
                     {/* Title */}
                     <div className="mb-4 flex justify-center w-full">
-                        <SplitText
-                            text="DeepTrust"
-                            className="text-6xl md:text-8xl lg:text-9xl font-bold text-foreground drop-shadow-[0_0_30px_rgba(124,58,237,0.4)] tracking-tighter"
-                            delay={80}
-                            duration={0.6}
-                            ease="power3.out"
-                            splitType="chars"
-                            from={{ opacity: 0, y: 40, rotateX: -30 }}
-                            to={{ opacity: 1, y: 0, rotateX: 0 }}
-                            threshold={0.1}
-                            rootMargin="-100px"
-                            textAlign="center"
-                            onLetterAnimationComplete={() => {}}
-                        />
+                        <GradientText
+                            colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
+                            animationSpeed={6}
+                            showBorder={false}
+                            className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter pb-2"
+                        >
+                            DeepTrust
+                        </GradientText>
                     </div>
 
                     {/* Subtitle */}
