@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import PixelTransition from '../components/PixelTransition';
 import { motion } from 'motion/react';
 import { Github, Linkedin, Globe, Instagram } from 'lucide-react';
-import ritabhasImg from '../assets/ritabhas.jpg';
+import { assets } from '../assets/assets';
 
 const TeamMemberCard = ({
     name,
@@ -81,7 +81,7 @@ export const About = () => {
         {
             name: "Rajdeep Pal",
             role: "Team Lead",
-            image: "https://i.ibb.co/p6FSjw9b/Rajdeep.jpg",
+            image: assets.Rajdeep,
             socials: {
                 github: "https://github.com/Rajdeep2302",
                 linkedin: "https://www.linkedin.com/in/rajdeep-pal-1b12b02b",
@@ -92,7 +92,7 @@ export const About = () => {
         {
             name: "Ritabhas Barick",
             role: "ML Expert",
-            image: ritabhasImg,
+            image: assets.ritabhas,
             socials: {
                 github: "https://github.com/akashsaha477",
                 linkedin: "https://www.linkedin.com/in/akash-saha-16a734b8/",
@@ -103,7 +103,7 @@ export const About = () => {
         {
             name: "Subhodeep Mondal",
             role: "Frontend",
-            image: "https://i.ibb.co/wNyL4525/Subhodeep.jpg",
+            image: assets.Subhodeep,
             socials: {
                 github: "https://github.com/ShadowLegend007",
                 linkedin: "https://www.linkedin.com/in/subhodeep-mondal-a3a2762b5/",

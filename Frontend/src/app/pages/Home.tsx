@@ -67,7 +67,7 @@ export function Home() {
                             colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
                             animationSpeed={6}
                             showBorder={false}
-                            className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter pb-2"
+                            className="text-[13vw] sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter pb-2"
                         >
                             DeepTrust
                         </GradientText>
