@@ -2,7 +2,6 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
     Upload,
-    Link as LinkIcon,
     Scan,
     CheckCircle2,
     AlertTriangle,
@@ -15,74 +14,22 @@ import {
     Image,
     Video,
     Music,
+    AlertCircle,
 } from "lucide-react";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-type Verdict = "authentic" | "suspicious" | "deepfake";
-
-interface AnalysisResult {
-    verdict: Verdict;
-    score: number; // 0-100 (100 = fully authentic)
-    label: string;
-    reasons: { icon: string; text: string; severity: "low" | "medium" | "high" }[];
-}
-
-// ─── Mock data factory ────────────────────────────────────────────────────────
-
-function generateMockResult(filename: string): AnalysisResult {
-    const rand = Math.random();
-
-    if (rand < 0.33) {
-        return {
-            verdict: "authentic",
-            score: Math.floor(Math.random() * 15) + 85,
-            label: "Authentic",
-            reasons: [
-                { icon: "✅", text: "No facial inconsistencies detected", severity: "low" },
-                { icon: "✅", text: "Metadata intact and consistent", severity: "low" },
-                { icon: "✅", text: "Natural compression artifacts present", severity: "low" },
-                { icon: "✅", text: "Lighting and shadow alignment verified", severity: "low" },
-            ],
-        };
-    } else if (rand < 0.66) {
-        return {
-            verdict: "suspicious",
-            score: Math.floor(Math.random() * 25) + 40,
-            label: "Suspicious",
-            reasons: [
-                { icon: "⚠️", text: "Metadata partially missing", severity: "medium" },
-                { icon: "⚠️", text: "Minor facial boundary artifacts detected", severity: "medium" },
-                { icon: "✅", text: "Audio-visual sync appears normal", severity: "low" },
-                { icon: "⚠️", text: "Unusual compression patterns in regions", severity: "medium" },
-            ],
-        };
-    } else {
-        return {
-            verdict: "deepfake",
-            score: Math.floor(Math.random() * 25) + 5,
-            label: "Likely Deepfake",
-            reasons: [
-                { icon: "🚨", text: "Facial inconsistencies detected around eyes", severity: "high" },
-                { icon: "🚨", text: "Metadata missing or tampered", severity: "high" },
-                { icon: "🚨", text: "Frame anomalies found in temporal analysis", severity: "high" },
-                { icon: "⚠️", text: "GAN-generated texture patterns identified", severity: "high" },
-            ],
-        };
-    }
-}
+import { analyzeFile } from "../../api";
+import { AnalysisResponse, AuthenticityIndicator } from "../../types";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function CircularScore({ score, verdict }: { score: number; verdict: Verdict }) {
+function CircularScore({ score, verdict }: { score: number; verdict: AuthenticityIndicator }) {
     const radius = 60;
     const circumference = 2 * Math.PI * radius;
     const strokeDash = (score / 100) * circumference;
 
-    const colorMap: Record<Verdict, string> = {
-        authentic: "#10b981",
-        suspicious: "#f59e0b",
-        deepfake: "#ef4444",
+    const colorMap: Record<AuthenticityIndicator, string> = {
+        Authentic: "#10b981",
+        Suspicious: "#f59e0b",
+        Manipulated: "#ef4444",
     };
 
     const color = colorMap[verdict];
@@ -90,7 +37,6 @@ function CircularScore({ score, verdict }: { score: number; verdict: Verdict }) 
     return (
         <div className="relative flex items-center justify-center w-40 h-40">
             <svg width="160" height="160" className="rotate-[-90deg]">
-                {/* Track */}
                 <circle
                     cx="80"
                     cy="80"
@@ -99,7 +45,6 @@ function CircularScore({ score, verdict }: { score: number; verdict: Verdict }) 
                     stroke="rgba(255,255,255,0.08)"
                     strokeWidth="12"
                 />
-                {/* Progress */}
                 <motion.circle
                     cx="80"
                     cy="80"
@@ -115,7 +60,6 @@ function CircularScore({ score, verdict }: { score: number; verdict: Verdict }) 
                     style={{ filter: `drop-shadow(0 0 8px ${color})` }}
                 />
             </svg>
-            {/* Center label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <motion.span
                     initial={{ opacity: 0, scale: 0.5 }}
@@ -123,7 +67,7 @@ function CircularScore({ score, verdict }: { score: number; verdict: Verdict }) 
                     transition={{ delay: 0.6, duration: 0.4 }}
                     className="text-3xl font-bold text-foreground"
                 >
-                    {score}%
+                    {score.toFixed(1)}%
                 </motion.span>
                 <span className="text-xs text-muted-foreground mt-1">Trust Score</span>
             </div>
@@ -131,26 +75,26 @@ function CircularScore({ score, verdict }: { score: number; verdict: Verdict }) 
     );
 }
 
-function VerdictBadge({ verdict, label }: { verdict: Verdict; label: string }) {
+function VerdictBadge({ verdict }: { verdict: AuthenticityIndicator }) {
     const config: Record<
-        Verdict,
+        AuthenticityIndicator,
         { Icon: typeof CheckCircle2; bg: string; border: string; text: string; glow: string }
     > = {
-        authentic: {
+        Authentic: {
             Icon: CheckCircle2,
             bg: "bg-emerald-500/10",
             border: "border-emerald-500/30",
             text: "text-emerald-400",
             glow: "0 0 20px rgba(16,185,129,0.25)",
         },
-        suspicious: {
+        Suspicious: {
             Icon: AlertTriangle,
             bg: "bg-amber-500/10",
             border: "border-amber-500/30",
             text: "text-amber-400",
             glow: "0 0 20px rgba(245,158,11,0.25)",
         },
-        deepfake: {
+        Manipulated: {
             Icon: XCircle,
             bg: "bg-red-500/10",
             border: "border-red-500/30",
@@ -170,38 +114,22 @@ function VerdictBadge({ verdict, label }: { verdict: Verdict; label: string }) {
             style={{ boxShadow: glow }}
         >
             <Icon className={`w-5 h-5 ${text}`} />
-            <span className={`font-semibold text-base ${text}`}>{label}</span>
+            <span className={`font-semibold text-base ${text}`}>{verdict}</span>
         </motion.div>
     );
 }
 
-function ReasonCard({
-    icon,
-    text,
-    severity,
-    index,
-}: {
-    icon: string;
-    text: string;
-    severity: "low" | "medium" | "high";
-    index: number;
-}) {
-    const severityStyle: Record<string, string> = {
-        low: "border-emerald-500/20 bg-emerald-500/5",
-        medium: "border-amber-500/20 bg-amber-500/5",
-        high: "border-red-500/20 bg-red-500/5",
+function MediaTypeBadge({ mediaType }: { mediaType: "image" | "audio" | "video" }) {
+    const config = {
+        image: { label: "Image", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
+        audio: { label: "Audio", color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/20" },
+        video: { label: "Video", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
     };
-
+    const { label, color, bg, border } = config[mediaType];
     return (
-        <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 + index * 0.1, duration: 0.35 }}
-            className={`flex items-start gap-3 p-3.5 rounded-xl border ${severityStyle[severity]} backdrop-blur-sm`}
-        >
-            <span className="text-lg leading-none mt-0.5">{icon}</span>
-            <p className="text-sm text-foreground/85 leading-relaxed">{text}</p>
-        </motion.div>
+        <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${bg} ${border} ${color}`}>
+            {label}
+        </span>
     );
 }
 
@@ -209,13 +137,11 @@ function ReasonCard({
 
 export function Analysis() {
     const [isDragOver, setIsDragOver] = useState(false);
-    const [urlInput, setUrlInput] = useState("");
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<AnalysisResult | null>(null);
+    const [result, setResult] = useState<AnalysisResponse | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // ── Helpers ─────────────────────────────────────────
 
     const getFileIcon = (file: File) => {
         if (file.type.startsWith("image/")) return <Image className="w-5 h-5 text-purple-400" />;
@@ -230,12 +156,10 @@ export function Analysis() {
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
-    // ── Handlers ─────────────────────────────────────────
-
     const handleFile = useCallback((file: File) => {
         setSelectedFile(file);
-        setUrlInput("");
         setResult(null);
+        setErrorMessage(null);
     }, []);
 
     const handleDrop = useCallback(
@@ -253,34 +177,42 @@ export function Analysis() {
         if (file) handleFile(file);
     };
 
-    const handleAnalyze = () => {
-        if (!selectedFile && !urlInput.trim()) return;
+    const handleAnalyze = async () => {
+        if (!selectedFile || isLoading) return;
         setIsLoading(true);
         setResult(null);
+        setErrorMessage(null);
 
-        // Simulate API delay
-        setTimeout(() => {
-            const name = selectedFile?.name ?? urlInput;
-            setResult(generateMockResult(name));
+        try {
+            const data = await analyzeFile(selectedFile);
+            setResult(data);
+        } catch (err) {
+            setErrorMessage(err instanceof Error ? err.message : "An unexpected error occurred.");
+        } finally {
             setIsLoading(false);
-        }, 2800);
+        }
     };
 
     const handleReset = () => {
         setSelectedFile(null);
-        setUrlInput("");
         setResult(null);
         setIsLoading(false);
+        setErrorMessage(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    const canAnalyze = (!!selectedFile || urlInput.trim().length > 0) && !isLoading;
+    const verdictDescription: Record<string, string> = {
+        Authentic: "This media appears to be original and unaltered. No manipulation signatures detected.",
+        Suspicious: "Anomalies detected. Use caution when sharing or relying on this media.",
+        Manipulated: "High confidence of AI manipulation. This media shows clear signs of deepfake generation.",
+    };
 
-    // ─────────────────────────────────────────────────────
+    const canAnalyze = !!selectedFile && !isLoading;
 
     return (
         <div className="min-h-screen pt-24 pb-16 px-4">
             <div className="max-w-3xl mx-auto flex flex-col gap-8">
+
                 {/* ── Page Header ── */}
                 <AnimatePresence mode="wait">
                     {!result && (
@@ -295,15 +227,40 @@ export function Analysis() {
                             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent pb-2">
                                 DeepTrust
                             </h1>
-                            <p className="text-text-secondary text-lg mt-2">
+                            <p className="text-muted-foreground text-lg mt-2">
                                 Verify digital media authenticity instantly
                             </p>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* ── Upload Section ── */}
+                {/* ── Error Banner ── */}
+                <AnimatePresence>
+                    {errorMessage && (
+                        <motion.div
+                            key="error"
+                            initial={{ opacity: 0, y: -12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex items-start gap-3 p-4 rounded-xl border border-red-500/30 bg-red-500/8 text-red-400"
+                        >
+                            <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+                            <div className="flex-1 text-sm leading-relaxed">{errorMessage}</div>
+                            <button
+                                onClick={() => setErrorMessage(null)}
+                                className="text-red-400/60 hover:text-red-400 transition-colors text-lg leading-none"
+                                aria-label="Dismiss error"
+                            >
+                                ×
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <AnimatePresence mode="wait">
+
+                    {/* ── Upload Section ── */}
                     {!result && !isLoading && (
                         <motion.div
                             key="upload"
@@ -315,10 +272,7 @@ export function Analysis() {
                         >
                             {/* Drop Zone */}
                             <div
-                                onDragOver={(e) => {
-                                    e.preventDefault();
-                                    setIsDragOver(true);
-                                }}
+                                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                                 onDragLeave={() => setIsDragOver(false)}
                                 onDrop={handleDrop}
                                 onClick={() => fileInputRef.current?.click()}
@@ -361,10 +315,7 @@ export function Analysis() {
                                 ) : (
                                     <>
                                         <motion.div
-                                            animate={{
-                                                y: isDragOver ? -6 : 0,
-                                                scale: isDragOver ? 1.1 : 1,
-                                            }}
+                                            animate={{ y: isDragOver ? -6 : 0, scale: isDragOver ? 1.1 : 1 }}
                                             transition={{ duration: 0.2 }}
                                             className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center"
                                         >
@@ -372,9 +323,7 @@ export function Analysis() {
                                         </motion.div>
                                         <div>
                                             <p className="font-semibold text-foreground text-base">
-                                                {isDragOver
-                                                    ? "Drop your file here"
-                                                    : "Drop a file or click to browse"}
+                                                {isDragOver ? "Drop your file here" : "Drop a file or click to browse"}
                                             </p>
                                             <p className="text-sm text-muted-foreground mt-1.5">
                                                 Supports images, videos, and audio files
@@ -382,34 +331,6 @@ export function Analysis() {
                                         </div>
                                     </>
                                 )}
-                            </div>
-
-                            {/* Divider */}
-                            <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                                <div className="flex-1 h-px bg-border" />
-                                <span>or paste a URL</span>
-                                <div className="flex-1 h-px bg-border" />
-                            </div>
-
-                            {/* URL Input */}
-                            <div className="relative">
-                                <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <input
-                                    type="url"
-                                    value={urlInput}
-                                    onChange={(e) => {
-                                        setUrlInput(e.target.value);
-                                        if (e.target.value) setSelectedFile(null);
-                                    }}
-                                    placeholder="https://example.com/video.mp4"
-                                    className="
-                                        w-full pl-11 pr-4 py-3.5 rounded-xl
-                                        bg-input border border-border
-                                        text-foreground placeholder:text-muted-foreground
-                                        focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30
-                                        transition-all duration-200 text-sm
-                                    "
-                                />
                             </div>
 
                             {/* Analyze Button */}
@@ -442,7 +363,6 @@ export function Analysis() {
                             exit={{ opacity: 0, scale: 0.9 }}
                             className="flex flex-col items-center justify-center py-24 gap-8"
                         >
-                            {/* Animated ring */}
                             <div className="relative w-24 h-24">
                                 <motion.div
                                     animate={{ rotate: 360 }}
@@ -459,7 +379,6 @@ export function Analysis() {
                                 </div>
                             </div>
 
-                            {/* Progress steps */}
                             <div className="flex flex-col gap-2 text-center">
                                 {[
                                     "Extracting media fingerprint…",
@@ -492,50 +411,61 @@ export function Analysis() {
                         >
                             {/* Result header card */}
                             <div className="glass-card rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
-                                {/* Circular progress */}
-                                <CircularScore score={result.score} verdict={result.verdict} />
-
-                                {/* Verdict + details */}
+                                <CircularScore
+                                    score={result.trust_score}
+                                    verdict={result.authenticity_indicator}
+                                />
                                 <div className="flex flex-col gap-3 items-center sm:items-start flex-1">
-                                    <VerdictBadge verdict={result.verdict} label={result.label} />
-
+                                    <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                                        <VerdictBadge verdict={result.authenticity_indicator} />
+                                        <MediaTypeBadge mediaType={result.media_type} />
+                                    </div>
                                     <p className="text-sm text-muted-foreground text-center sm:text-left max-w-xs">
-                                        {result.verdict === "authentic"
-                                            ? "This media appears to be original and unaltered. No manipulation signatures detected."
-                                            : result.verdict === "suspicious"
-                                            ? "Anomalies detected. Use caution when sharing or relying on this media."
-                                            : "High confidence of AI manipulation. This media shows clear signs of deepfake generation."}
+                                        {verdictDescription[result.authenticity_indicator]}
                                     </p>
-
                                     <div className="flex items-center gap-1.5 mt-1">
                                         <ShieldCheck className="w-4 h-4 text-accent" />
                                         <span className="text-xs text-muted-foreground">
-                                            Analyzed with DeepTrust AI v2.1
+                                            Analyzed with DeepTrust v1.0
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Explanation cards */}
-                            <div className="glass-card rounded-2xl p-6">
-                                <div className="flex items-center gap-2 mb-5">
-                                    <Eye className="w-5 h-5 text-accent" />
-                                    <h2 className="font-semibold text-base text-foreground">
-                                        Explanation Panel
-                                    </h2>
-                                </div>
-                                <div className="flex flex-col gap-3">
-                                    {result.reasons.map((r, i) => (
-                                        <ReasonCard
-                                            key={i}
-                                            icon={r.icon}
-                                            text={r.text}
-                                            severity={r.severity}
-                                            index={i}
+                            {/* Visual Evidence */}
+                            {result.visual_evidence_base64 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.35, duration: 0.45 }}
+                                    className="glass-card rounded-2xl p-6"
+                                >
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Eye className="w-5 h-5 text-accent" />
+                                        <h2 className="font-semibold text-base text-foreground">
+                                            {result.media_type === "audio"
+                                                ? "Audio Waveform"
+                                                : "ELA Heatmap — Forensic Evidence"}
+                                        </h2>
+                                    </div>
+                                    <div className="rounded-xl overflow-hidden border border-border/40">
+                                        <img
+                                            src={result.visual_evidence_base64}
+                                            alt={
+                                                result.media_type === "audio"
+                                                    ? "Audio waveform visualisation"
+                                                    : "Error Level Analysis heatmap"
+                                            }
+                                            className="w-full object-contain max-h-72"
                                         />
-                                    ))}
-                                </div>
-                            </div>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                                        {result.media_type === "audio"
+                                            ? "Waveform derived from raw PCM samples. Unnaturally smooth or periodic patterns may indicate synthetic generation."
+                                            : "Bright regions in the ELA heatmap indicate higher compression residuals — a forensic signal of image manipulation or deepfake insertion."}
+                                    </p>
+                                </motion.div>
+                            )}
 
                             {/* Reset */}
                             <motion.button
