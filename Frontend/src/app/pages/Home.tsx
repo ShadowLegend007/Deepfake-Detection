@@ -2,6 +2,7 @@ import { ArrowRight, Shield, Zap, Eye } from "lucide-react";
 import { motion } from "motion/react";
 import { AnimatedButton } from "../components/AnimatedButton";
 import GradientText from "../components/GradientText";
+import StarBorder from "../components/StarBorder";
 import { ScrollReveal } from "../components/ScrollReveal";
 import { useNavigate } from "react-router-dom";
 
@@ -92,9 +93,12 @@ export function Home() {
                         transition={{ delay: 0.8, duration: 0.5 }}
                         className="mt-4"
                     >
-                        <AnimatedButton onClick={() => navigate("/analyze")} icon={ArrowRight}>
-                            Start Analyzing
-                        </AnimatedButton>
+                        <StarBorder as="button" color="#B19EEF" speed="6s" onClick={() => navigate("/analyze")}>
+                            <div className="flex items-center gap-2 font-medium">
+                                Start Analyzing
+                                <ArrowRight className="w-5 h-5" />
+                            </div>
+                        </StarBorder>
                     </motion.div>
                 </div>
             </section>

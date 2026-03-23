@@ -210,8 +210,8 @@ export function Analysis() {
     const canAnalyze = !!selectedFile && !isLoading;
 
     return (
-        <div className="min-h-screen pt-24 pb-16 px-4">
-            <div className="max-w-3xl mx-auto flex flex-col gap-8">
+        <div className="min-h-screen pt-16 pb-16 px-4 flex flex-col items-center justify-center">
+            <div className="w-full max-w-3xl mx-auto flex flex-col gap-8 relative z-10">
 
                 {/* ── Page Header ── */}
                 <AnimatePresence mode="wait">
@@ -282,8 +282,8 @@ export function Analysis() {
                                     ${isDragOver
                                         ? "border-purple-400 bg-purple-500/10 scale-[1.01]"
                                         : selectedFile
-                                        ? "border-purple-500/40 bg-purple-500/5"
-                                        : "border-border hover:border-purple-500/50 hover:bg-purple-500/5"
+                                        ? "border-purple-500/40 bg-purple-50 dark:bg-purple-500/5"
+                                        : "border-purple-300 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/5 hover:border-purple-400 dark:hover:border-purple-500/50 hover:bg-purple-100/50 dark:hover:bg-purple-500/10"
                                     }
                                 `}
                                 style={{

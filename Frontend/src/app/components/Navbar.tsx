@@ -88,7 +88,7 @@ export function Navbar() {
                     </div>
 
                     {/* Unified Connected Pill (Desktop/Tablet) */}
-                    <div className="hidden min-[376px]:flex items-center bg-transparent backdrop-blur-md border border-black/10 dark:border-white/10 rounded-full px-1 py-1 shadow-sm overflow-hidden">
+                    <div className="hidden min-[576px]:flex items-center bg-transparent backdrop-blur-md border border-black/10 dark:border-white/10 rounded-full px-1 py-1 shadow-sm overflow-hidden">
 
                         {/* Home Link */}
                         <Link
@@ -167,8 +167,8 @@ export function Navbar() {
                         </div>
                     </div>
 
-                    {/* Hamburger Button (Mobile <= 375px) */}
-                    <div className="block min-[376px]:hidden">
+                    {/* Hamburger Button (Mobile < 576px) */}
+                    <div className="block min-[576px]:hidden">
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="p-2 rounded-full text-foreground/80 hover:text-purple-500 dark:hover:text-purple-400 transition-colors"
@@ -186,7 +186,7 @@ export function Navbar() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="absolute top-20 right-0 left-0 mx-6 min-[376px]:hidden bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-4 flex flex-col gap-2 z-10"
+                            className="absolute top-20 right-0 left-0 mx-6 min-[576px]:hidden bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-4 flex flex-col gap-2 z-10"
                         >
                             <Link
                                 to="/"
