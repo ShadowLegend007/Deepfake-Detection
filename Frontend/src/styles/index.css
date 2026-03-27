@@ -2,7 +2,6 @@
 @import './tailwind.css';
 @import './theme.css';
 
-/* Swap Toggle Animation */
 .swap {
   position: relative;
   display: inline-grid;

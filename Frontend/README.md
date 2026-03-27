@@ -6,7 +6,7 @@ A responsive, highly interactive React frontend for the DeepTrust Deepfake Detec
 
 - **Drag & Drop Upload**: Seamlessly upload Images (`.jpg`, `.png`), Audio (`.mp3`, `.wav`), or Video (`.mp4`) files.
 - **Forensic Results Dashboard**: Real-time display of the trust score and model verdict.
-- **Visual Evidence Rendering**: Directly renders the Error Level Analysis (ELA) heatmap for visual media, or the PCM waveform plot for audio, making the AI's decision transparent.
+- **Visual Evidence Rendering**: Directly renders the Error Level Analysis (ELA) heatmap for visual media (derived from the 11-signal forensic pipeline), or the PCM waveform plot for audio, making the AI's decision transparent.
 - **Backend Status Indicator**: A live-pulsing indicator in the navigation bar checking the FastAPI backend health every 10 seconds.
 - **Dark/Light Theme**: Fully styled with Tailwind's dark mode, adapting to system preferences or user toggle.
 

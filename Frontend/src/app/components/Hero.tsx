@@ -9,7 +9,6 @@ interface HeroProps {
 
 export function Hero({ onGetStarted }: HeroProps) {
   const handleAnimationComplete = () => {
-    // Optional callback
   };
 
   return (

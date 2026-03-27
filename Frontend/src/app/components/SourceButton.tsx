@@ -12,7 +12,6 @@ export function SourceButton({ url, sourceName, label = "Source" }: SourceButton
         if (url) {
             window.open(url, "_blank", "noopener,noreferrer");
         } else {
-            // Google search fallback
             const searchQuery = encodeURIComponent(sourceName);
             window.open(`https://www.google.com/search?q=${searchQuery}`, "_blank", "noopener,noreferrer");
         }

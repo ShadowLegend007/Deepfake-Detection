@@ -1,84 +1,88 @@
-# DeepTrust — Comprehensive Deepfake Detection System
+# DeepTrust — Advanced Deepfake & Media Manipulation Detection
 
-![DeepTrust Verification Banner](https://img.shields.io/badge/Verification-DeepTrust-7c3aed?style=for-the-badge) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-RandomForest-ff69b4?style=for-the-badge)
+![DeepTrust Banner](https://img.shields.io/badge/Status-Operational-success?style=for-the-badge) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![Licence-MIT](https://img.shields.io/badge/License-MIT-gray?style=for-the-badge)
 
-**DeepTrust** is an AI-powered forensic tool designed to detect manipulated media in an era where generative AI and deepfakes are increasingly sophisticated. By analyzing imperceptible artifacts in Images, Audio, and Video files, DeepTrust provides an instant **Trust Score** and clear visual evidence to determine authenticity.
-
-## 🚀 Features
-
-- **Multi-Modal Analysis**: Supports three types of media testing:
-  - 🖼️ **Images** (`.jpg`, `.png`): Uses Error Level Analysis (ELA) to find spliced, manipulated, or GAN-generated regions.
-  - 🎙️ **Audio** (`.mp3`, `.wav`): Uses MFCC feature extraction to detect unnatural spectral variance and voice clones.
-  - 🎥 **Video** (`.mp4`): Extracts frames to perform per-frame ELA and measures temporal inter-frame variance to flag face-swapping or deepfake artifacts.
-- **Zero-Latency Inference**: 3 custom RandomForest models are trained in-memory on application startup, resulting in instant predictions (milliseconds).
-- **Visual Evidence**: Returns an actionable ELA Heatmap (for visuals) or a PCM Waveform Plot (for audio), allowing users to see exactly *why* media was flagged.
-- **Interactive UI**: A beautiful, responsive React frontend featuring Dark Mode, glassmorphic UI elements, and real-time backend health monitoring.
+**DeepTrust** is a state-of-the-art forensic analysis suite designed to identify AI-generated media, face-swaps, and manual edits in images, audio, and video. By combining traditional digital forensics (like ELA) with modern machine learning (RandomForest ensembles), DeepTrust provides high-confidence authenticity assessments and visual evidence for digital investigators and curious users alike.
 
 ---
 
-## 🏗️ Project Structure
+## 🚀 Key Features
 
-The repository is divided into two fully modularized directories:
+### 🖼️ Image Forensics (11-Signal Pipeline)
+DeepTrust doesn't just look at pixels; it analyzes the digital "DNA" of an image:
+- **Error Level Analysis (ELA)**: Detects inconsistent JPEG compression levels across an image.
+- **Frequency Domain Mapping**: Uses FFT to identify unnatural high-frequency patterns typical of GAN/Diffusion models.
+- **Noise Analysis**: Measures sensor noise variance and kurtosis to find region-level splicing.
+- **Metadata Scrubbing**: Inspects EXIF fields for AI software signatures and suspicious power-of-two dimensions.
+- **Block Artifact Grid (BAG)**: Detects the 8×8 DCT grid boundaries naturally present in real camera photos.
 
-### 1. [`/Backend`](./Backend/)
-A robust, high-performance Python backend built with **FastAPI**.
-- **Stack**: FastAPI, Scikit-learn, OpenCV (`cv2`), Pillow (PIL), NumPy, Matplotlib.
-- **Key Flow**: Routes file uploads (`POST /analyze`) -> MIME type detection -> Dedicated Processor (`image_processor.py`, `audio_processor.py`, `video_processor.py`) -> ML Inference -> JSON response with Base64 visual evidence.
-- *See the detailed [Backend README](./Backend/README.md) for full API documentation and endpoint details.*
+### 🎙️ Audio Forensics
+Detects voice clones and synthetic speech using spectral analysis:
+- **MFCC Feature Extraction**: Analyzes the spectral envelope of audio tracks.
+- **Spectral Flatness**: Identifies the unnaturally smooth frequencies found in TTS systems.
+- **Waveform Visualization**: Renders high-fidelity PCM waveform plots as forensic evidence.
 
-### 2. [`/Frontend`](./Frontend/)
-A sleek, user-centric web interface built with **React** and **Vite**.
-- **Stack**: React 18, TypeScript, Tailwind CSS, Framer Motion, Lucide Icons.
-- **Key Flow**: Drag-and-drop upload -> Fetch API call -> Forensic Dashboard (Gauge UI, Authenticity Badges, Evidence Canvas).
-- *See the detailed [Frontend README](./Frontend/README.md) for setup instructions and UI component structure.*
+### 🎥 Video Forensics
+Analyzes temporal consistency to unmask deepfakes:
+- **Temporal Sampled ELA**: Analyzes key frames across the video for compression inconsistencies.
+- **Inter-Frame Variance**: Measures temporal "jitter" — a primary indicator of face-swapping and frame-level manipulation.
 
 ---
 
-## ⚡ Getting Started (Local Development)
+## 🏗️ Architecture
 
-To run the full DeepTrust system locally, you need to spin up both the Front-end and Back-end servers.
+DeepTrust is built on a high-performance **FastAPI** backend and a reactive **React** frontend.
 
-### Prerequisites
-- **Python 3.9+**
-- **Node.js 18+** & npm (or yarn)
+### [Backend](./Backend/) (Python 3.12+)
+- **FastAPI**: Asynchronous API layer for high-concurrency file processing.
+- **Scikit-Learn**: In-memory `RandomForestClassifier` trained on startup for zero-latency inference.
+- **Pillow / OpenCV**: Core image and video manipulation libraries.
+- **Weighted Ensemble Scoring**: Combines multiple signals into a single "Authenticity Indicator."
 
-### Step 1: Start the Backend (FastAPI)
+### [Frontend](./Frontend/) (React / Vite)
+- **Modern UI**: A premium, dark-themed dashboard built with Tailwind CSS and Radix UI.
+- **Live Monitoring**: Real-time backend status tracking via a persistent health-check pill.
+- **Evidence Canvas**: Interactive rendering of ELA heatmaps and audio waveforms.
+
+---
+
+## ⚡ Quick Start
+
+### 1. Requirements
+Ensure you have **Python 3.9+** and **Node.js 18+** installed.
+
+### 2. Setup Backend
 ```bash
 cd Backend
 pip install -r requirements.txt
-uvicorn main:app --reload
+python -m uvicorn main:app --port 8064 --host 127.0.0.1
 ```
-*The backend will be live at `http://localhost:8064`.*
+*Backend runs at `http://localhost:8064`. API docs available at `/docs`.*
 
-### Step 2: Start the Frontend (Vite/React)
-Open a new terminal window:
+### 3. Setup Frontend
 ```bash
 cd Frontend
 npm install
 npm run dev
 ```
-*The frontend will be live at `http://localhost:5173`.*
+*Frontend runs at `http://localhost:5173`. Ensure `.env` is set to `VITE_API_URL=http://localhost:8064`.*
 
 ---
 
-## 🧠 How it Works
-
-1. **Upload**: User drags a suspicious `.mp4` video into the DeepTrust web UI.
-2. **Transfer**: The frontend posts the file via `FormData` to the `POST /analyze` endpoint on the FastAPI server.
-3. **Extraction**: The backend `video_processor` uses OpenCV to slice the video into frames.
-4. **Analysis**: It applies Error Level Analysis to detect differing compression levels (indicating manipulation) and calculates the temporal variance between frames.
-5. **Prediction**: The data is piped into the in-memory `RandomForestClassifier` trained specifically for Video forensics.
-6. **Result**: The API returns a `trust_score` (e.g., 23% - Manipulated), along with an ELA heatmap of the analyzed frames.
-7. **Display**: The React app renders the trust score in a visual gauge and displays the heatmap so the user can see the tampered region.
+## 🧠 Forensic Workflow
+1. **Pinging**: The frontend checks the backend health and model training status.
+2. **Analysis**: Upon upload, the backend routes the file to the appropriate forensic processor.
+3. **Evidence**: Statistical features are extracted and piped into the ML model while a visual heatmap/waveform is generated.
+4. **Verdict**: The system returns a **Trust Score (0-100)** and a verdict: `Authentic`, `Suspicious`, or `Manipulated`.
 
 ---
 
 ## 👥 The Team
-Built by the Hackathon team dedicated to fighting digital misinformation:
-- **Rajdeep Pal** - Team Lead
-- **Ritabhas Barick** - ML Expert
+- **Rajdeep Pal** - Team Lead & Backend Architect
+- **Ritabhas Barick** - ML Engineer
 - **Subhodeep Mondal** - Frontend Developer
 
 ---
 
-**DeepTrust** — Bringing forensic truth to the masses.
+**DeepTrust** — Restoring digital truth in the age of AI.
+

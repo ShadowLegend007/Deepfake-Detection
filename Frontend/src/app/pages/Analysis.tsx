@@ -19,7 +19,6 @@ import {
 import { analyzeFile } from "../../api";
 import { AnalysisResponse, AuthenticityIndicator } from "../../types";
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function CircularScore({ score, verdict }: { score: number; verdict: AuthenticityIndicator }) {
     const radius = 60;
@@ -133,7 +132,6 @@ function MediaTypeBadge({ mediaType }: { mediaType: "image" | "audio" | "video" 
     );
 }
 
-// ─── Main Analysis Page ───────────────────────────────────────────────────────
 
 export function Analysis() {
     const [isDragOver, setIsDragOver] = useState(false);

@@ -8,7 +8,6 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 }
 
 export function AnimatedButton({ icon: Icon, children, className = "", onClick, ...props }: AnimatedButtonProps) {
-  // Cast props to any to avoid strict Motion/React event type conflicts
   const motionProps = props as any;
 
   return (

@@ -9,6 +9,10 @@ logger = get_logger("Router.Analyze")
 
 router = APIRouter()
 
+_MAX_IMAGE_BYTES = 20  * 1024 * 1024   #  20 MB
+_MAX_AUDIO_BYTES = 50  * 1024 * 1024   #  50 MB
+_MAX_VIDEO_BYTES = 200 * 1024 * 1024   # 200 MB
+
 
 @router.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
@@ -19,13 +23,30 @@ async def analyze(file: UploadFile = File(...)):
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
+    n_bytes = len(file_bytes)
+
     if content_type.startswith("image/"):
+        if n_bytes > _MAX_IMAGE_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Image too large ({n_bytes // 1024} KB). Max: {_MAX_IMAGE_BYTES // 1024 // 1024} MB.",
+            )
         result = process_image(file_bytes)
 
     elif content_type.startswith("audio/"):
+        if n_bytes > _MAX_AUDIO_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Audio too large ({n_bytes // 1024 // 1024} MB). Max: {_MAX_AUDIO_BYTES // 1024 // 1024} MB.",
+            )
         result = process_audio(file_bytes)
 
     elif content_type.startswith("video/"):
+        if n_bytes > _MAX_VIDEO_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Video too large ({n_bytes // 1024 // 1024} MB). Max: {_MAX_VIDEO_BYTES // 1024 // 1024} MB.",
+            )
         result = process_video(file_bytes)
 
     else:
