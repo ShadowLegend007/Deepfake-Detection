@@ -1,3 +1,4 @@
+// Helper function to get the proper Nutri-Score gradient colors
 const getNutriScoreGradient = (grade: string) => {
     switch (grade.toUpperCase()) {
         case "A":
@@ -15,6 +16,7 @@ const getNutriScoreGradient = (grade: string) => {
     }
 };
 
+// Nutri-Score Scale Component
 export function NutriScoreScale({ selectedGrade }: { selectedGrade: string }) {
     return (
         <div className="flex-1">

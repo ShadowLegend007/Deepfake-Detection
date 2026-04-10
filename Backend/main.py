@@ -1,5 +1,3 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,33 +7,22 @@ from app.routers.analyze import router as analyze_router
 
 logger = get_logger("Main")
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Startup / shutdown lifecycle handler (replaces deprecated on_event)."""
-    train_all_models()
-    yield
-
-
 app = FastAPI(
     title="DeepTrust",
-    description=(
-        "Comprehensive Deepfake Detection System — "
-        "Supports Image (multi-signal ELA), Audio (MFCC), and Video (temporal ELA) analysis."
-    ),
+    description="Comprehensive Deepfake Detection System — Supports Image (ELA), Audio (MFCC), and Video (temporal ELA) analysis.",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan,
 )
 
 app.add_middleware(CORSMiddleware, **CORS_CONFIG)
+
 app.include_router(analyze_router)
 
 
-@app.get("/ping", tags=["Health"])
-async def ping():
-    return {"ping": "pong"}
+@app.on_event("startup")
+async def startup_event() -> None:
+    train_all_models()
 
 
 @app.get("/", tags=["Health"])

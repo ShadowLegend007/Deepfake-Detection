@@ -13,6 +13,7 @@ interface PieChartProps {
 const DEFAULT_COLORS = ['#7c3aed', '#8b5cf6', '#3b82f6', '#60a5fa', '#10b981'];
 
 export function PieChart({ data, title }: PieChartProps) {
+  // Custom label renderer matching the reference style
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }: any) => {
     if (percent < 0.05) return null;
     const RADIAN = Math.PI / 180;

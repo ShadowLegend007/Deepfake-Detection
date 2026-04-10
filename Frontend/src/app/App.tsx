@@ -31,6 +31,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window !== "undefined") {
+      // Priority: 1. Local Storage, 2. System Preference, 3. Default Dark (as requested fallback)
       const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
       if (savedTheme) return savedTheme;
 
@@ -40,12 +41,14 @@ function App() {
     return "dark";
   });
 
+  // Detect theme changes & Initialize DOM
   useEffect(() => {
     const detectTheme = () => {
       const isDark = document.documentElement.classList.contains("dark");
       setTheme(isDark ? "dark" : "light");
     };
 
+    // Apply initial theme from state to DOM immediately if not set
     if (!document.documentElement.classList.contains("dark") && !document.documentElement.classList.contains("light")) {
       if (theme === "dark") {
         document.documentElement.classList.add("dark");
@@ -62,6 +65,9 @@ function App() {
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
+      // Only react to system changes if no local preference is saved? 
+      // Or should we always react? Usually system changes should update if user hasn't hard-locked.
+      // But standard behavior with a toggle is: user override > system.
       if (!localStorage.getItem("theme")) {
         setTheme(e.matches ? "dark" : "light");
         if (e.matches) document.documentElement.classList.add("dark");

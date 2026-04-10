@@ -5,19 +5,29 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
+    // 1. Check if a theme is already applied in DOM (source of truth for current session)
     const isDarkDOM = document.documentElement.classList.contains("dark");
+    // 2. Check localStorage
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
 
     if (savedTheme) {
       setTheme(savedTheme);
+      // Ensure DOM matches saved (recovery if out of sync)
       if (savedTheme === "dark") document.documentElement.classList.add("dark");
       else document.documentElement.classList.remove("dark");
     } else {
+      // No saved theme? Use what's in the DOM or fallback to system
+      // If DOM has 'dark' class, we assume dark. If not, and we have no saved preference, we check system.
+      // But App.tsx might have already set the class based on system.
       if (isDarkDOM) {
         setTheme("dark");
       } else {
+        // If DOM implies light (no dark class), we verify if we should be dark via system
+        // This handles cases where App.tsx didn't run or we are mounting in isolation
         const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         if (systemDark) {
+          // System wants dark, but DOM is light?
+          // If App.tsx ran, DOM should be dark. If not, let's respect system.
           setTheme("dark");
           document.documentElement.classList.add("dark");
         } else {

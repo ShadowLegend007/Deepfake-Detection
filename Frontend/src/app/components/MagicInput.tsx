@@ -76,6 +76,7 @@ export function MagicInput({ onAnalyze }: MagicInputProps) {
         {/* Input Section */}
         <div className="w-full">
           {searchMode === "name" ? (
+            // Text Search Mode
             <form onSubmit={handleSubmit} className="w-full relative">
               <div className="flex flex-col gap-2">
                 <label className="text-base font-bold text-foreground">
@@ -125,6 +126,7 @@ export function MagicInput({ onAnalyze }: MagicInputProps) {
               </div>
             </form>
           ) : (
+            // Picture Search Mode
             <div className="w-full flex flex-col justify-center items-center">
               <label className="text-base font-bold text-foreground mb-3 block">
                 Upload Product Image

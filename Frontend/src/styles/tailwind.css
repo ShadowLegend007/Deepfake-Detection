@@ -3,6 +3,7 @@
 
 @import 'tw-animate-css';
 
+/* Custom animations - Subtle and smooth */
 @theme {
   --animate-star-movement-bottom: star-movement-bottom linear infinite alternate;
   --animate-star-movement-top: star-movement-top linear infinite alternate;

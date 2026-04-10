@@ -11,8 +11,10 @@ export const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Toggle sidebar
     const toggleSidebar = () => setIsOpen(!isOpen);
 
+    // Sidebar items
     const menuItems = [
         { icon: Home, label: 'Home', path: '/' },
         { icon: Sparkles, label: 'Analysis', path: '/analysis' },

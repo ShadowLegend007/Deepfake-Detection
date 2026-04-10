@@ -8,6 +8,7 @@ interface SafetyMeterProps {
 }
 
 export function SafetyMeter({ safetyScore, label = "Safety Score", size = "medium" }: SafetyMeterProps) {
+  // Determine color based on score
   const getColor = () => {
     if (safetyScore >= 70) return {
       bg: "bg-emerald-500",

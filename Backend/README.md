@@ -146,11 +146,11 @@ A dict consumed by `CORSMiddleware` that sets `allow_origins=["*"]`, enabling th
 **`MODELS`**
 A module-level dict holding the three trained `RandomForestClassifier` instances keyed by `"image"`, `"audio"`, and `"video"`. Populated once on startup, then read concurrently by all processor modules without any re-training overhead per request.
 
-**`_generate_image_training_data(n_samples=800)`**
-Generates a synthetic **11-dimensional** image forensic dataset.
+**`_generate_image_training_data(n_samples=600)`**
+Generates a synthetic 5-dimensional ELA training dataset.
 
-- **Class 0 (Authentic):** Low ELA residuals (`std_R/G/B ∈ [1, 6]`, `mean ∈ [0.5, 5]`), high-frequency stability, natural noise kurtosis, and presence of JPEG blocking artifacts.
-- **Class 1 (Manipulated):** High ELA residuals (`std_R/G/B ∈ [10, 35]`, `mean ∈ [12, 40]`), spectral anomalies (GAN artifacts), and lack of natural camera noise or blocking signatures.
+- **Class 0 (Authentic):** `std_R/G/B ∈ [1, 6]`, `mean_diff ∈ [0.5, 5]`, `max_diff ∈ [5, 25]` — mimics the tight, low-energy residuals of an already-compressed authentic JPEG.
+- **Class 1 (Manipulated):** `std_R/G/B ∈ [10, 35]`, `mean_diff ∈ [12, 40]`, `max_diff ∈ [60, 200]` — mimics the large, wide-spread residuals of a region that was edited and re-compressed once.
 
 **`_generate_audio_training_data(n_samples=600)`**
 Generates a synthetic 26-dimensional MFCC training dataset (13 mean + 13 std values).
@@ -174,16 +174,17 @@ Called once by the FastAPI startup event. Generates all three datasets, fits a `
 **`_pil_image_to_base64_jpeg(img, quality=85) → str`**
 Encodes a `PIL.Image` object into a `data:image/jpeg;base64,...` data-URI string. Used internally to prepare the ELA heatmap for the JSON response.
 
-**`extract_features(image_bytes) → AnalysisResult`**
-The primary image analysis entry point. It runs 6 parallel forensic signals:
-1. **ELA**: JPEG recompression residuals.
-2. **Frequency**: FFT-based spectral distribution.
-3. **Noise**: Laplacian variance and residual statistical analysis.
-4. **Metadata**: EXIF and file-format heuristic check.
-5. **Colour**: Channel-wise statistic (std, saturation, skew).
-6. **Blocking**: 8x8 DCT grid detection.
+**`extract_ela_features(image_bytes) → tuple[list[float], str]`**
+Core Error Level Analysis (ELA) implementation. The full pipeline:
 
-Returns an `AnalysisResult` containing an 11-dimensional feature vector: `[std_R, std_G, std_B, mean_ela, max_ela, gray_std, gray_mean, freq_score, noise_score, colour_score, blocking_score]`.
+1. Load the uploaded image as RGB.
+2. Re-save it at **90% JPEG quality** into an in-memory buffer — simulating a second lossy compression pass.
+3. Compute the **pixel-wise absolute difference** between the original and re-compressed version using `PIL.ImageChops.difference`.
+4. **Amplify** the residual difference by ×20 to make manipulation artefacts visually obvious.
+5. Extract 5 statistical features from the amplified heatmap: `[std_R, std_G, std_B, mean_diff, max_diff]`.
+6. Encode the heatmap as a base64 JPEG.
+
+Returns the feature vector and the base64 heatmap string.
 
 > **Why this works:** Authentic JPEG images have already settled at their optimal compression level. Re-compressing them produces very small, uniform residuals (dark in ELA). A pixel that was edited in an uncompressed state and then saved as JPEG has only been through one compression cycle — it shows much larger residuals (bright in ELA) when re-compressed again.
 
@@ -262,8 +263,8 @@ Client uploads file
         ▼
 POST /analyze (analyze.py)
         │
-        ├── image/* ──► extract_features()
-        │                    └── 11-Signal Pipeline → features [std_R, ..., blocking_score]
+        ├── image/* ──► extract_ela_features()
+        │                    └── pixel diff × 20 → features [std_R, std_G, std_B, mean, max]
         │                         └── MODELS["image"].predict_proba()
         │
         ├── audio/* ──► _generate_synthetic_mfcc_features()

@@ -39,6 +39,7 @@ const SplitText: React.FC<SplitTextProps> = ({
     const ref = useRef<HTMLElement>(null);
     const animationCompletedRef = useRef(false);
 
+    // Helper to split text
     const renderContent = () => {
         if (splitType === 'chars' || splitType === 'words, chars') {
             return text.split('').map((char, i) => (
@@ -51,6 +52,7 @@ const SplitText: React.FC<SplitTextProps> = ({
                 </span>
             ));
         }
+        // Simple words split
         if (splitType === 'words') {
             return text.split(' ').map((word, i) => (
                 <span key={i} className="split-word inline-block mr-[0.25em]">
@@ -58,6 +60,7 @@ const SplitText: React.FC<SplitTextProps> = ({
                 </span>
             ));
         }
+        // Fallback or lines (lines are hard to do without the plugin or complex CSS calculation, treating as block)
         return text;
     };
 
@@ -69,6 +72,8 @@ const SplitText: React.FC<SplitTextProps> = ({
             const elements = ref.current.querySelectorAll('.split-char, .split-word');
 
             if (elements.length === 0) {
+                // If simply text (lines), animate the container or text content? 
+                // For now, let's assume we fall back to simple reveal if split failed or wasn't chars/words
                 gsap.fromTo(
                     ref.current,
                     { ...from },

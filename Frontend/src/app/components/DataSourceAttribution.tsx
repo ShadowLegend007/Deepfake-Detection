@@ -10,7 +10,9 @@ interface DataSourceAttributionProps {
 
 export function DataSourceAttribution({ dataSource, confidenceLevel, sourceUrl }: DataSourceAttributionProps) {
     const getConfidenceColor = (level: string) => {
+        // --- FIX START: Add safety check ---
         if (!level) return "text-gray-500 bg-gray-500/10 border-gray-500/20";
+        // --- FIX END ---
 
         switch (level.toLowerCase()) {
             case "high":
